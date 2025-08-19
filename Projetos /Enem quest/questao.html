@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz ENEM - Matemática</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light-gray: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .quiz-header {
+            background: var(--gradient);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quiz-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quiz-subject {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .quiz-stats {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-text {
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Timer */
+        .timer {
+            position: fixed;
+            top: 120px;
+            right: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .timer.warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            animation: pulse 1s infinite;
+        }
+
+        .timer.danger {
+            background: linear-gradient(135deg, #f8d7da, #ff6b6b);
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .timer-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-time {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .timer-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        /* Main Content */
+        .quiz-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            flex: 1;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+        }
+
+        .question-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .question-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .question-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .tag-subject { background: var(--primary); }
+        .tag-year { background: var(--gray); }
+        .tag-topic { background: var(--secondary); }
+        .tag-difficulty-1 { background: #22c55e; }
+        .tag-difficulty-2 { background: #3b82f6; }
+        .tag-difficulty-3 { background: var(--warning); }
+        .tag-difficulty-4 { background: #f97316; }
+        .tag-difficulty-5 { background: var(--danger); }
+
+        .question-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--dark);
+            margin-bottom: 2.5rem;
+        }
+
+        .question-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        /* Alternatives */
+        .alternatives {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .alternative {
+            display: flex;
+            align-items: flex-start;
+            padding: 1.25rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+        .alternative:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(255, 255, 255, 1));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .alternative.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(255, 255, 255, 1));
+            box-shadow: var(--shadow);
+        }
+
+        .alternative.correct {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(255, 255, 255, 1));
+            animation: correctAnswer 0.6s ease;
+        }
+
+        .alternative.incorrect {
+            border-color: var(--danger);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(255, 255, 255, 1));
+            animation: incorrectAnswer 0.6s ease;
+        }
+
+        @keyframes correctAnswer {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes incorrectAnswer {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .alternative-letter {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gray);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .alternative.selected .alternative-letter {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .alternative.correct .alternative-letter {
+            background: var(--success);
+        }
+
+        .alternative.incorrect .alternative-letter {
+            background: var(--danger);
+        }
+
+        .alternative-text {
+            flex: 1;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--dark);
+        }
+
+        /* Action Buttons */
+        .quiz-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Result Panel */
+        .result-panel {
+            margin-top: 2rem;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+
+        .result-panel.correct {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(255, 255, 255, 0.9));
+            border: 2px solid var(--success);
+        }
+
+        .result-panel.incorrect {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(255, 255, 255, 0.9));
+            border: 2px solid var(--danger);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .result-explanation {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--dark);
+            margin-bottom: 2rem;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .result-stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* Recommendation Card */
+        .recommendation-card {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .recommendation-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .recommendation-text {
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content,
+            .progress-content,
+            .quiz-container {
+                padding: 0 1rem;
+            }
+
+            .quiz-stats {
+                gap: 1rem;
+            }
+
+            .stat-number {
+                font-size: 1.2rem;
+            }
+
+            .timer {
+                position: static;
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+
+            .question-content {
+                font-size: 1rem;
+            }
+
+            .alternative {
+                padding: 1rem;
+            }
+
+            .quiz-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                min-width: 100%;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Quiz Header -->
+    <header class="quiz-header">
+        <div class="header-content">
+            <div class="quiz-title">
+                <h1>📚 Quiz ENEM</h1>
+                <div class="quiz-subject">Matemática e suas Tecnologias</div>
+            </div>
+            <div class="quiz-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="currentQuestion">1</div>
+                    <div class="stat-label">Questão</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCorrect">0</div>
+                    <div class="stat-label">Acertos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="accuracy">0%</div>
+                    <div class="stat-label">Precisão</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-content">
+            <div class="progress-info">
+                <span class="progress-text">Progresso do Quiz</span>
+                <span class="progress-text" id="progressText">1 de 10 questões</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 10%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer" id="timer">
+        <div class="timer-icon">⏱️</div>
+        <div class="timer-time" id="timerDisplay">05:00</div>
+        <div class="timer-label">por questão</div>
+    </div>
+
+    <!-- Main Quiz Content -->
+    <div class="quiz-container">
+        <div class="question-card" id="questionCard">
+            <div class="question-header">
+                <span class="question-number">Questão <span id="questionNum">1</span></span>
+                <div class="question-tags">
+                    <span class="tag tag-subject">Matemática</span>
+                    <span class="tag tag-year">ENEM 2023</span>
+                    <span class="tag tag-topic">Funções</span>
+                    <span class="tag tag-difficulty-3">Nível 3</span>
+                </div>
+            </div>
+
+            <div class="question-content" id="questionContent">
+                <p><strong>Uma empresa de delivery cobra uma taxa fixa de R$ 8,00 plus R$ 3,50 por quilômetro de distância. Se a função que representa o valor total V(x) a ser pago em função da distância x (em km) é dada por V(x) = ax + b, então os valores de a e b são, respectivamente:</strong></p>
+            </div>
+
+            <div class="alternatives" id="alternatives">
+                <div class="alternative" onclick="selectAlternative(this, 'A')">
+                    <div class="alternative-letter">A</div>
+                    <div class="alternative-text">a = 8 e b = 3,5</div>
+                </div>
+                <div class="alternative" onclick="selectAlternative(this, 'B')">
+                    <div class="alternative-letter">B</div>
+                    <div class="alternative-text">a = 3,5 e b = 8</div>
+                </div>
+                <div class="alternative" onclick="selectAlternative(this, 'C')">
+                    <div class="alternative-letter">C</div>
+                    <div class="alternative-text">a = 11,5 e b = 0</div>
+                </div>
+                <div class="alternative" onclick="selectAlternative(this, 'D')">
+                    <div class="alternative-letter">D</div>
+                    <div class="alternative-text">a = 8 e b = -3,5</div>
+                </div>
+                <div class="alternative" onclick="selectAlternative(this, 'E')">
+                    <div class="alternative-letter">E</div>
+                    <div class="alternative-text">a = -3,5 e b = 8</div>
+                </div>
+            </div>
+
+            <div class="quiz-actions">
+                <button class="btn btn-primary" id="confirmBtn" onclick="confirmAnswer()">
+                    ✅ Confirmar Resposta
+                </button>
+                <button class="btn btn-secondary" onclick="skipQuestion()">
+                    ⏭️ Pular Questão
+                </button>
+                <button class="btn btn-warning" onclick="showHint()">
+                    💡 Dica
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz State
+        let currentQuestionIndex = 0;
+        let selectedAnswer = null;
+        let correctAnswers = 0;
+        let totalQuestions = 10;
+        let timeLeft = 300; // 5 minutes per question
+        let timerInterval;
+        let answered = false;
+
+        // Sample questions data
+        const questions = [
+            {
+                id: 1,
+                subject: "Matemática",
+                topic: "Funções",
+                year: 2023,
+                difficulty: 3,
+                content: "Uma empresa de delivery cobra uma taxa fixa de R$ 8,00 plus R$ 3,50 por quilômetro de distância. Se a função que representa o valor total V(x) a ser pago em função da distância x (em km) é dada por V(x) = ax + b, então os valores de a e b são, respectivamente:",
+                alternatives: [
+                    { letter: 'A', text: 'a = 8 e b = 3,5' },
+                    { letter: 'B', text: 'a = 3,5 e b = 8' },
+                    { letter: 'C', text: 'a = 11,5 e b = 0' },
+                    { letter: 'D', text: 'a = 8 e b = -3,5' },
+                    { letter: 'E', text: 'a = -3,5 e b = 8' }
+                ],
+                correct: 'B',
+                explanation: "Em uma função do tipo V(x) = ax + b, o coeficiente 'a' representa a taxa variável (R$ 3,50 por km) e 'b' representa a taxa fixa (R$ 8,00). Portanto, a = 3,5 e b = 8.",
+                hint: "Lembre-se: em funções lineares, o termo independente representa o valor fixo."
+            }
+        ];
+
+        // Initialize Quiz
+        function initializeQuiz() {
+            updateQuestionDisplay();
+            startTimer();
+            updateProgress();
+        }
+
+        // Timer Functions
+        function startTimer() {
+            timeLeft = 300; // Reset to 5 minutes
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 60) {
+                    document.getElementById('timer').classList.add('warning');
+                }
+                if (timeLeft <= 30) {
+                    document.getElementById('timer').classList.add('danger');
+                }
+                if (timeLeft <= 0) {
+                    timeOut();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer').classList.remove('warning', 'danger');
+        }
+
+        function timeOut() {
+            stopTimer();
+            if (!answered) {
+                showTimeoutResult();
+            }
+        }
+
+        // Question Display Functions
+        function updateQuestionDisplay() {
+            const question = questions[currentQuestionIndex] || questions[0];
+            
+            document.getElementById('questionNum').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionContent').innerHTML = `<p><strong>${question.content}</strong></p>`;
+            
+            // Update alternatives
+            const alternativesContainer = document.getElementById('alternatives');
+            alternativesContainer.innerHTML = '';
+            
+            question.alternatives.forEach(alt => {
+                const altDiv = document.createElement('div');
+                altDiv.className = 'alternative';
+                altDiv.onclick = () => selectAlternative(altDiv, alt.letter);
+                altDiv.innerHTML = `
+                    <div class="alternative-letter">${alt.letter}</div>
+                    <div class="alternative-text">${alt.text}</div>
+                `;
+                alternativesContainer.appendChild(altDiv);
+            });
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `${currentQuestionIndex + 1} de ${totalQuestions} questões`;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            
+            // Update accuracy
+            const accuracy = currentQuestionIndex > 0 ? Math.round((correctAnswers / currentQuestionIndex) * 100) : 0;
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
+            document.getElementById('totalCorrect').textContent = correctAnswers;
+        }
+
+        // Answer Selection Functions
+        function selectAlternative(element, letter) {
+            if (answered) return;
+            
+            // Remove selection from all alternatives
+            document.querySelectorAll('.alternative').forEach(alt => {
+                alt.classList.remove('selected');
+            });
+            
+            // Select clicked alternative
+            element.classList.add('selected');
+            selectedAnswer = letter;
+            
+            // Enable confirm button
+            document.getElementById('confirmBtn').disabled = false;
+        }
+
+        function confirmAnswer() {
+            if (!selectedAnswer || answered) return;
+            
+            answered = true;
+            stopTimer();
+            
+            const question = questions[currentQuestionIndex] || questions[0];
+            const alternatives = document.querySelectorAll('.alternative');
+            const isCorrect = selectedAnswer === question.correct;
+            
+            // Update score
+            if (isCorrect) {
+                correctAnswers++;
+            }
+            
+            // Show correct/incorrect alternatives
+            alternatives.forEach(alt => {
+                const letter = alt.querySelector('.alternative-letter').textContent;
+                if (letter === question.correct) {
+                    alt.classList.add('correct');
+                } else if (alt.classList.contains('selected') && !isCorrect) {
+                    alt.classList.add('incorrect');
+                }
+            });
+            
+            // Show result panel
+            showResult(isCorrect, question);
+            
+            // Update button
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.innerHTML = currentQuestionIndex < totalQuestions - 1 ? 
+                '➡️ Próxima Questão' : '🏁 Finalizar Quiz';
+            confirmBtn.onclick = currentQuestionIndex < totalQuestions - 1 ? nextQuestion : finishQuiz;
+        }
+
+        function showResult(isCorrect, question) {
+            const resultPanel = document.createElement('div');
+            resultPanel.className = `result-panel ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            const timeSpent = 300 - timeLeft;
+            const minutes = Math.floor(timeSpent / 60);
+            const seconds = timeSpent % 60;
+            
+            resultPanel.innerHTML = `
+                <div class="result-icon">${isCorrect ? '🎉' : '😔'}</div>
+                <h3 class="result-title">${isCorrect ? 'Parabéns! Resposta Correta!' : 'Resposta Incorreta'}</h3>
+                <div class="result-explanation">
+                    <strong>Explicação:</strong><br>
+                    ${question.explanation}
+                </div>
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="result-stat-number">${minutes}:${seconds.toString().padStart(2, '0')}</div>
+                        <div class="result-stat-label">Tempo gasto</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-number">${isCorrect ? '+10' : '0'}</div>
+                        <div class="result-stat-label">Pontos</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-number">${Math.round((correctAnswers / (currentQuestionIndex + 1)) * 100)}%</div>
+                        <div class="result-stat-label">Precisão</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('questionCard').appendChild(resultPanel);
+        }
+
+        function showTimeoutResult() {
+            answered = true;
+            const resultPanel = document.createElement('div');
+            resultPanel.className = 'result-panel incorrect';
+            
+            resultPanel.innerHTML = `
+                <div class="result-icon">⏰</div>
+                <h3 class="result-title">Tempo Esgotado!</h3>
+                <p>O tempo para responder esta questão acabou. Vamos para a próxima!</p>
+                <button class="btn btn-primary" onclick="nextQuestion()" style="margin-top: 1rem;">
+                    ➡️ Próxima Questão
+                </button>
+            `;
+            
+            document.getElementById('questionCard').appendChild(resultPanel);
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                selectedAnswer = null;
+                answered = false;
+                
+                // Remove result panel
+                const resultPanel = document.querySelector('.result-panel');
+                if (resultPanel) {
+                    resultPanel.remove
