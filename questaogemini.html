@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENEM Smart - Módulo de Questões</title>
+    <style>
+        /* Estilos Essenciais Extraídos do Arquivo Original */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light-gray: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--light-gray);
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Container Principal */
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Card da Questão */
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: var(--gradient);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        /* Níveis de Dificuldade */
+        .tag.difficulty-1 { background: var(--success); }
+        .tag.difficulty-2 { background: #22d3ee; }
+        .tag.difficulty-3 { background: var(--warning); }
+        .tag.difficulty-4 { background: #f97316; }
+        .tag.difficulty-5 { background: var(--danger); }
+
+        .question-content {
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            color: var(--dark);
+        }
+
+        .alternatives {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .alternative {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .alternative:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .alternative.selected {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .alternative.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--dark);
+        }
+
+        .alternative.incorrect {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--dark);
+        }
+
+        .alternative-letter {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gray);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            transition: background-color 0.3s ease;
+        }
+        
+        .alternative.selected .alternative-letter { background: var(--primary); }
+        .alternative.correct .alternative-letter { background: var(--success); }
+        .alternative.incorrect .alternative-letter { background: var(--danger); }
+
+        /* Botões */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Feedback da Resposta */
+        .feedback-message {
+            margin-top: 1.5rem; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-weight: 600;
+            animation: fadeIn 0.4s;
+        }
+
+        .feedback-correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .feedback-incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Design Responsivo */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .question-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="quiz-container">
+            </div>
+    </div>
+
+    <script>
+        // --- Estado do Quiz ---
+        let selectedAnswer = null;
+        let isAnswerSubmitted = false;
+        const correctAnswer = 'A'; // Resposta correta para a questão de exemplo
+
+        // --- Dados da Questão (Exemplo) ---
+        const currentQuestion = {
+            subject: 'Matemática',
+            difficulty: 3,
+            exam: 'ENEM 2022',
+            topic: 'Função de 1º Grau', // Corrigido para ser mais preciso
+            id: '135 (ENEM 2022)',
+            statement: 'Uma empresa de transporte cobra uma taxa fixa de R$ 5,00 mais R$ 2,50 por quilômetro rodado. A função que representa o custo total C(x) em função da distância x (em km) é:',
+            alternatives: [
+                { letter: 'A', text: 'C(x) = 5 + 2,5x' },
+                { letter: 'B', text: 'C(x) = 2,5 + 5x' },
+                { letter: 'C', text: 'C(x) = 5x + 2,5' },
+                { letter: 'D', text: 'C(x) = 7,5x' },
+                { letter: 'E', text: 'C(x) = 5 × 2,5x' },
+            ]
+        };
+
+        // --- Funções do Quiz ---
+
+        /**
+         * Renderiza a questão na tela a partir de um objeto de questão.
+         */
+        function renderQuestion(question) {
+            const quizContainer = document.getElementById('quiz-container');
+
+            // Gera o HTML das alternativas
+            const alternativesHTML = question.alternatives.map(alt => `
+                <div class="alternative" onclick="selectAlternative(this, '${alt.letter}')">
+                    <div class="alternative-letter">${alt.letter}</div>
+                    <div>${alt.text}</div>
+                </div>
+            `).join('');
+
+            // Gera o HTML do card da questão completo
+            quizContainer.innerHTML = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="question-meta">
+                            <span class="tag">${question.subject}</span>
+                            <span class="tag difficulty-${question.difficulty}">Nível ${question.difficulty}</span>
+                            <span class="tag">${question.exam}</span>
+                            <span class="tag">${question.topic}</span>
+                        </div>
+                    </div>
+
+                    <div class="question-content">
+                        <p><strong>Questão ${question.id}</strong></p>
+                        <p>${question.statement}</p>
+                    </div>
+
+                    <div class="alternatives">${alternativesHTML}</div>
+
+                    <div id="feedback-container"></div>
+
+                    <div id="button-container" style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                        <button class="btn btn-primary" onclick="submitAnswer()">
+                            ✅ Confirmar Resposta
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadNextQuestion()">
+                            ⏭️ Pular Questão
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Seleciona uma alternativa.
+         */
+        function selectAlternative(element, letter) {
+            if (isAnswerSubmitted) return; // Não permite mudar a seleção após o envio
+
+            const alternatives = document.querySelectorAll('.alternative');
+            alternatives.forEach(alt => alt.classList.remove('selected'));
+            
+            element.classList.add('selected');
+            selectedAnswer = letter;
+        }
+
+        /**
+         * Confirma a resposta, mostra o feedback e atualiza os botões.
+         */
+        function submitAnswer() {
+            if (!selectedAnswer) {
+                alert('Por favor, selecione uma alternativa antes de confirmar.');
+                return;
+            }
+            if (isAnswerSubmitted) {
+                loadNextQuestion();
+                return;
+            }
+
+            isAnswerSubmitted = true;
+            const alternatives = document.querySelectorAll('.alternative');
+            
+            // Mostra a resposta correta e a incorreta (se houver)
+            alternatives.forEach(alt => {
+                const letter = alt.querySelector('.alternative-letter').textContent;
+                if (letter === correctAnswer) {
+                    alt.classList.add('correct');
+                } else if (alt.classList.contains('selected')) {
+                    alt.classList.add('incorrect');
+                }
+            });
+
+            // Cria e exibe a mensagem de feedback
+            const isCorrect = selectedAnswer === correctAnswer;
+            const message = isCorrect ? '✅ Parabéns! Resposta correta!' : '❌ Resposta incorreta.';
+            
+            const feedbackContainer = document.getElementById('feedback-container');
+            feedbackContainer.innerHTML = `
+                <div class="feedback-message ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+                    ${message}
+                </div>
+            `;
+
+            // Atualiza os botões
+            updateButtonsAfterSubmit();
+        }
+
+        /**
+         * Atualiza o botão principal para "Próxima Questão".
+         */
+        function updateButtonsAfterSubmit() {
+            const buttonContainer = document.getElementById('button-container');
+            const confirmBtn = buttonContainer.querySelector('.btn-primary');
+            confirmBtn.innerHTML = '➡️ Próxima Questão';
+            
+            // O botão de pular pode ser escondido ou desabilitado
+            const skipBtn = buttonContainer.querySelector('.btn-secondary');
+            skipBtn.style.display = 'none';
+        }
+
+        /**
+         * Simula o carregamento de uma nova questão.
+         */
+        function loadNextQuestion() {
+            // Reseta o estado para a próxima questão
+            selectedAnswer = null;
+            isAnswerSubmitted = false;
+
+            // Animação de saída (opcional)
+            const card = document.querySelector('.question-card');
+            card.style.transition = 'opacity 0.4s, transform 0.4s';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-20px)';
+            
+            // Simula o carregamento
+            setTimeout(() => {
+                alert('Carregando próxima questão recomendada...');
+                // Aqui você faria a lógica para buscar a próxima questão
+                // Por enquanto, apenas recarregamos a mesma questão de exemplo
+                renderQuestion(currentQuestion); 
+            }, 400);
+        }
+
+        // --- Inicialização ---
+        // Renderiza a primeira questão quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            renderQuestion(currentQuestion);
+        });
+
+    </script>
+
+</body>
+</html>

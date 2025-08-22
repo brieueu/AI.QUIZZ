@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENEM Smart - Plataforma de Recomendação</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light-gray: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+            --gradient-accent: linear-gradient(135deg, var(--accent), var(--primary));
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--light-gray);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--gradient);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .nav {
+            background: white;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .nav-tab:hover {
+            color: var(--primary-dark);
+            background: var(--light-gray);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: var(--gradient);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag.difficulty-1 { background: var(--success); }
+        .tag.difficulty-2 { background: #22d3ee; }
+        .tag.difficulty-3 { background: var(--warning); }
+        .tag.difficulty-4 { background: #f97316; }
+        .tag.difficulty-5 { background: var(--danger); }
+
+        .question-content {
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            color: var(--dark);
+        }
+
+        .alternatives {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .alternative {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .alternative:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .alternative.selected {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .alternative.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .alternative.incorrect {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .alternative-letter {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gray);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .alternative.selected .alternative-letter {
+            background: var(--primary);
+        }
+
+        .alternative.correct .alternative-letter {
+            background: var(--success);
+        }
+
+        .alternative.incorrect .alternative-letter {
+            background: var(--danger);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Subject Cards */
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .subject-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .subject-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .subject-math { background: linear-gradient(135deg, #96CEB4, #7FB069); }
+        .subject-sciences { background: linear-gradient(135deg, #4ECDC4, #44A08D); }
+        .subject-languages { background: linear-gradient(135deg, #45B7D1, #2196F3); }
+        .subject-humanities { background: linear-gradient(135deg, #FF6B6B, #FF5722); }
+        .subject-writing { background: linear-gradient(135deg, #FFEAA7, #FDC830); }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container, .header-content, .nav-content {
+                padding: 0 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Recommendation Panel */
+        .recommendation-panel {
+            background: var(--gradient-accent);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .recommendation-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .recommendation-reason {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">📚 ENEM Smart</div>
+            <div class="user-profile">
+                <span>João Silva</span>
+                <div class="avatar">JS</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
+                <button class="nav-tab" onclick="showTab('study')">Estudar</button>
+                <button class="nav-tab" onclick="showTab('subjects')">Disciplinas</button>
+                <button class="nav-tab" onclick="showTab('progress')">Progresso</button>
+                <button class="nav-tab" onclick="showTab('recommendations')">Recomendações</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Questões Hoje</h3>
+                        <div class="card-icon" style="background: var(--success);">📝</div>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--success); margin: 0.5rem 0;">12</div>
+                    <div style="color: var(--gray);">Meta: 15 questões</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 80%;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Taxa de Acerto</h3>
+                        <div class="card-icon" style="background: var(--primary);">🎯</div>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--primary); margin: 0.5rem 0;">73%</div>
+                    <div style="color: var(--gray);">Últimas 30 questões</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 73%;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Sequência</h3>
+                        <div class="card-icon" style="background: var(--warning);">🔥</div>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--warning); margin: 0.5rem 0;">7</div>
+                    <div style="color: var(--gray);">dias consecutivos</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 70%;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tempo Médio</h3>
+                        <div class="card-icon" style="background: var(--secondary);">⏱️</div>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--secondary); margin: 0.5rem 0;">2:34</div>
+                    <div style="color: var(--gray);">por questão</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recommendation-panel">
+                <h3 class="recommendation-title">🎯 Próxima Recomendação</h3>
+                <div class="recommendation-reason">
+                    Com base no seu desempenho em Funções, recomendamos uma questão de nível intermediário sobre Função Quadrática para consolidar o aprendizado.
+                </div>
+                <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="showTab('study')">
+                    Começar Agora
+                </button>
+            </div>
+        </div>
+
+        <!-- Study Tab -->
+        <div id="study" class="tab-content">
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-meta">
+                        <span class="tag">Matemática</span>
+                        <span class="tag difficulty-3">Nível 3</span>
+                        <span class="tag">ENEM 2022</span>
+                        <span class="tag">Função Quadrática</span>
+                    </div>
+                </div>
+
+                <div class="question-content">
+                    <p><strong>Questão 135 (ENEM 2022)</strong></p>
+                    <p>Uma empresa de transporte cobra uma taxa fixa de R$ 5,00 mais R$ 2,50 por quilômetro rodado. A função que representa o custo total C(x) em função da distância x (em km) é:</p>
+                </div>
+
+                <div class="alternatives">
+                    <div class="alternative" onclick="selectAlternative(this, 'A')">
+                        <div class="alternative-letter">A</div>
+                        <div>C(x) = 5 + 2,5x</div>
+                    </div>
+                    <div class="alternative" onclick="selectAlternative(this, 'B')">
+                        <div class="alternative-letter">B</div>
+                        <div>C(x) = 2,5 + 5x</div>
+                    </div>
+                    <div class="alternative" onclick="selectAlternative(this, 'C')">
+                        <div class="alternative-letter">C</div>
+                        <div>C(x) = 5x + 2,5</div>
+                    </div>
+                    <div class="alternative" onclick="selectAlternative(this, 'D')">
+                        <div class="alternative-letter">D</div>
+                        <div>C(x) = 7,5x</div>
+                    </div>
+                    <div class="alternative" onclick="selectAlternative(this, 'E')">
+                        <div class="alternative-letter">E</div>
+                        <div>C(x) = 5 × 2,5x</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn btn-primary" onclick="submitAnswer()">
+                        ✅ Confirmar Resposta
+                    </button>
+                    <button class="btn btn-secondary" onclick="skipQuestion()">
+                        ⏭️ Pular Questão
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Tab -->
+        <div id="subjects" class="tab-content">
+            <div class="subjects-grid">
+                <div class="subject-card" onclick="selectSubject('math')">
+                    <div class="subject-icon subject-math">📊</div>
+                    <h3>Matemática</h3>
+                    <p style="color: var(--gray); margin: 0.5rem 0;">45 questões resolvidas</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 68%;"></div>
+                    </div>
+                    <p style="color: var(--gray); font-size: 0.9rem;">Taxa de acerto: 68%</p>
+                </div>
+
+                <div class="subject-card" onclick="selectSubject('sciences')">
+                    <div class="subject-icon subject-sciences">🔬</div>
+                    <h3>Ciências da Natureza</h3>
+                    <p style="color: var(--gray); margin: 0.5rem 0;">32 questões resolvidas</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%;"></div>
+                    </div>
+                    <p style="color: var(--gray); font-size: 0.9rem;">Taxa de acerto: 75%</p>
+                </div>
+
+                <div class="subject-card" onclick="selectSubject('languages')">
+                    <div class="subject-icon subject-languages">📖</div>
+                    <h3>Linguagens</h3>
+                    <p style="color: var(--gray); margin: 0.5rem 0;">28 questões resolvidas</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 82%;"></div>
+                    </div>
+                    <p style="color: var(--gray); font-size: 0.9rem;">Taxa de acerto: 82%</p>
+                </div>
+
+                <div class="subject-card" onclick="selectSubject('humanities')">
+                    <div class="subject-icon subject-humanities">🏛️</div>
+                    <h3>Ciências Humanas</h3>
+                    <p style="color: var(--gray); margin: 0.5rem 0;">38 questões resolvidas</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 71%;"></div>
+                    </div>
+                    <p style="color: var(--gray); font-size: 0.9rem;">Taxa de acerto: 71%</p>
+                </div>
+
+                <div class="subject-card" onclick="selectSubject('writing')">
+                    <div class="subject-icon subject-writing">✍️</div>
+                    <h3>Redação</h3>
+                    <p style="color: var(--gray); margin: 0.5rem 0;">5 redações escritas</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 85%;"></div>
+                    </div>
+                    <p style="color: var(--gray); font-size: 0.9rem;">Nota média: 850</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Tab -->
+        <div id="progress" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">143</div>
+                    <div class="stat-label">Questões Resolvidas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">73%</div>
+                    <div class="stat-label">Taxa de Acerto Geral</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">28h</div>
+                    <div class="stat-label">Tempo de Estudo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Dias Consecutivos</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">Evolução Semanal</h3>
+                <div style="height: 200px; background: var(--light-gray); border-radius: 8px; margin-top: 1rem; display: flex; align-items: center; justify-content: center; color: var(--gray);">
+                    📈 Gráfico de evolução (aqui seria integrado um gráfico real)
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations Tab -->
+        <div id="recommendations" class="tab-content">
+            <div class="card">
+                <h3 class="card-title">🤖 Recomendações Inteligentes</h3>
+                <div style="margin-top: 1.5rem;">
+                    <div style="padding: 1rem; border-left: 4px solid var(--primary); background: rgba(102, 126, 234, 0.1); margin-bottom: 1rem; border-radius: 0 8px 8px 0;">
+                        <strong>Próxima questão recomendada:</strong> Função Quadrática - Nível 3<br>
+                        <small style="color: var(--gray);">Baseado no seu desempenho em funções lineares</small>
+                    </div>
+                    <div style="padding: 1rem; border-left: 4px solid var(--success); background: rgba(16, 185, 129, 0.1); margin-bottom: 1rem; border-radius: 0 8px 8px 0;">
+                        <strong>Ponto forte identificado:</strong> Geometria Plana<br>
+                        <small style="color: var(--gray);">86% de acerto nas últimas questões</small>
+                    </div>
+                    <div style="padding: 1rem; border-left: 4px solid var(--warning); background: rgba(245, 158, 11, 0.1); margin-bottom: 1rem; border-radius: 0 8px 8px 0;">
+                        <strong>Área para revisar:</strong> Estatística e Probabilidade<br>
+                        <small style="color: var(--gray);">45% de acerto - recomendamos revisar conceitos básicos</small>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;">
+                    Ver Todas as Recomendações
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAnswer = null;
+
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+        }
+
+        function selectAlternative(element, letter) {
+            // Remove selection from all alternatives
+            const alternatives = document.querySelectorAll('.alternative');
+            alternatives.forEach(alt => alt.classList.remove('selected'));
+            
+            // Select clicked alternative
+            element.classList.add('selected');
+            selectedAnswer = letter;
+        }
+
+        function submitAnswer() {
+            if (!selectedAnswer) {
+                alert('Por favor, selecione uma alternativa antes de confirmar.');
+                return;
+            }
+
+            const alternatives = document.querySelectorAll('.alternative');
+            
+            // Show correct answer (A is correct in this example)
+            alternatives.forEach(alt => {
+                const letter = alt.querySelector('.alternative-letter').textContent;
+                if (letter === 'A') {
+                    alt.classList.add('correct');
+                } else if (alt.classList.contains('selected') && letter !== 'A') {
+                    alt.classList.add('incorrect');
+                }
+            });
+
+            // Show result message
+            const isCorrect = selectedAnswer === 'A';
+            const message = isCorrect ? 
+                '✅ Parabéns! Resposta correta!' : 
+                '❌ Resposta incorreta. A alternativa correta é A.';
+            
+            // Create result div
+            const resultDiv = document.createElement('div');
+            resultDiv.style.cssText = `
+                margin-top: 1rem; 
+                padding: 1rem; 
+                border-radius: 8px; 
+                text-align: center; 
+                font-weight: 600;
+                background: ${isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};
+                color: ${isCorrect ? 'var(--success)' : 'var(--danger)'};
+            `;
+            resultDiv.innerHTML = message;
+            
+            document.querySelector('.question-card').appendChild(resultDiv);
+
+            // Update button to "Next Question"
+            setTimeout(() => {
+                const confirmBtn = document.querySelector('.btn-primary');
+                confirmBtn.innerHTML = '➡️ Próxima Questão';
+                confirmBtn.onclick = loadNextQuestion;
+            }, 1500);
+        }
+
+        function loadNextQuestion() {
+            // Simulate loading next question
+            alert('Carregando próxima questão recomendada...');
+            // Here you would actually load the next question from the database
+        }
+
+        function
