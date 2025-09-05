@@ -9,7 +9,6 @@ Sistema avançado para previsão de matrizes de variância-covariância usando d
 ├── 🐍 main.py                 # Ponto de entrada principal
 ├── 🧠 vcov_predictor.py       # Lógica de machine learning e processamento
 ├── 🎨 gradio_interface.py     # Interface gráfica web (Gradio)
-├── 📁 venv/                   # Ambiente virtual Python
 └── 📄 README.md               # Este arquivo
 ```
 
