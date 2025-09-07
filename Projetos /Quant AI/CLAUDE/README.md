@@ -1,4 +1,51 @@
-# 🚀 Previsor de Matriz V-Cov com RNN
+# 🚀 Sistema de Predição ```
+projeto/
+├── main.py                  # 🚀 Ponto de entrada da aplicação
+├── vcov_predictor.py        # 🧮 Core ML: LSTM + V-Cov + Alfa
+├── gradio_interface.py      # 🌐 Interface web com Gradio
+├── alpha_weighting.py       # 🎯 Módulo de ponderação alfa
+├── requirements.txt         # 📦 Dependências do projeto
+├── .gitignore              # 🚫 Arquivos ignorados pelo Git
+└── README.md               # 📖 Documentação
+```
+
+### 🔧 Componentes Principais
+
+#### `vcov_predictor.py` - Motor de Machine Learning
+- **VCovPredictor**: Classe principal para predições V-Cov
+- **Métodos LSTM**: Modelagem temporal de volatilidades
+- **Decomposição de Cholesky**: Garantia matemática de consistência
+- **Integração Alfa**: Cálculos de ponderação baseados em performance
+
+#### `alpha_weighting.py` - Sistema de Ponderação Alfa
+- **AlphaWeighting**: Classe para análise de alfa/beta
+- **Cálculo CAPM**: Regressão linear para determinar alfa e beta
+- **Otimização de pesos**: Distribuição baseada na capacidade de alfa
+- **Análise estatística**: Métricas de performance do portfólio
+
+#### `gradio_interface.py` - Interface Web
+- **Interface dupla**: Abas separadas para V-Cov e Ponderação Alfa
+- **Visualizações avançadas**: Plotly para gráficos interativos
+- **UX otimizada**: Design responsivo e intuitivo
+- **Feedback em tempo real**: Progress bars e status updatescom RNN + Ponderação Alfa
+
+Sistema avançado para previsão de matrizes de variância-covariância usando redes neurais LSTM e análise de ponderação baseada em alfa para otimização de portfólios quantitativos.
+
+## 🎯 Funcionalidades Principais
+
+### 📈 Predição de Matriz V-Cov
+- **Redes LSTM**: Modelagem temporal de correlações e volatilidades
+- **Decomposição de Cholesky**: Garantia de matrizes positivas definidas
+- **Dados em tempo real**: Integração com Yahoo Finance API
+- **Visualizações interativas**: Heatmaps de correlação e V-Cov
+
+### 🎯 Ponderação Alfa (NOVO!)
+- **Cálculo de Alfa/Beta**: Análise CAPM para cada ativo
+- **Otimização automática**: Pesos baseados na capacidade de geração de alfa
+- **Análise de performance**: Identificação de ativos outperformers
+- **Visualizações avançadas**: Gráficos de pesos e dispersão alfa-beta
+
+## 🏗️ Arquitetura do SistemaMatriz V-Cov com RNN
 
 Sistema avançado para previsão de matrizes de variância-covariância usando decomposição de Cholesky e redes neurais LSTM.
 
@@ -41,16 +88,75 @@ Sistema avançado para previsão de matrizes de variância-covariância usando d
 
 ## 🚀 Como Executar
 
+### 1. Preparação do Ambiente
 ```bash
-# 1. Ativar ambiente virtual
-source venv/bin/activate
+# Clonar o repositório
+git clone https://github.com/brieueu/AI.QUIZZ.git
+cd AI.QUIZZ
 
-# 2. Instalar dependências (se necessário)
-pip install gradio plotly yfinance pandas numpy scipy tensorflow scikit-learn
+# Criar ambiente virtual
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou venv\Scripts\activate  # Windows
 
-# 3. Executar aplicação
-python main.py
+# Instalar dependências
+pip install -r requirements.txt
 ```
+
+### 2. Executar a Aplicação
+```bash
+# Executar o programa principal
+python main.py
+
+# Ou executar diretamente com o Python do venv
+"./venv/bin/python" main.py  # Linux/Mac
+# ou ".\venv\Scripts\python.exe" main.py  # Windows
+```
+
+### 3. Acessar Interface Web
+- Abra seu navegador em: `http://localhost:7862`
+- Use as abas **Predição V-Cov** e **Ponderação Alfa**
+
+### 4. Exemplos de Uso
+
+#### Predição V-Cov
+```
+Tickers: AAPL, GOOGL, MSFT, AMZN
+Período: 5 anos
+Janela: 90 dias
+```
+
+#### Ponderação Alfa
+```
+Tickers: AAPL, GOOGL, MSFT, AMZN, TSLA
+Benchmark: ^GSPC (S&P 500)
+Taxa livre de risco: 2.0%
+```
+
+## 📊 Funcionalidades Detalhadas
+
+### 🔮 Sistema de Predição V-Cov
+1. **Download automático** de dados históricos via Yahoo Finance
+2. **Cálculo de matrizes** V-Cov históricas com janela deslizante
+3. **Decomposição de Cholesky** para manter consistência matemática
+4. **Modelagem LSTM** para capturar padrões temporais
+5. **Predição futura** da estrutura de correlação
+6. **Visualizações interativas** com heatmaps e métricas
+
+### 🎯 Sistema de Ponderação Alfa
+1. **Análise CAPM** para cada ativo individualmente
+2. **Cálculo de Alfa/Beta** usando regressão linear
+3. **Otimização de pesos** baseada na capacidade de geração de alfa
+4. **Identificação de outperformers** e underperformers
+5. **Visualizações analíticas** com gráficos de barras e dispersão
+6. **Recomendações estratégicas** para construção de portfólio
+
+### 📈 Métricas e Análises
+- **Volatilidades anualizadas** por ativo
+- **Matrizes de correlação** com códigos de cores
+- **Análise de concentração** do portfólio
+- **Estatísticas de risco-retorno** detalhadas
+- **Comparação com benchmark** (S&P 500 padrão)
 
 ## 🌐 Acesso
 

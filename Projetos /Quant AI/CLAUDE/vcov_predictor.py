@@ -17,6 +17,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from sklearn.preprocessing import MinMaxScaler
+from alpha_weighting import AlphaWeighting
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -347,4 +348,123 @@ class VCovPredictor:
             vol = np.sqrt(predicted_vcov[i, i]) * 100
             result_text += f"- **{ticker}**: {vol:.2f}%\n"
 
+        return result_text
+
+    def calculate_alpha_weighted_portfolio(self, tickers_input, benchmark="^GSPC", risk_free_rate=0.02, period="2y"):
+        """
+        Calcula ponderação alfa para o portfólio.
+        
+        Args:
+            tickers_input (str): Tickers separados por vírgula
+            benchmark (str): Benchmark para cálculo do alfa
+            risk_free_rate (float): Taxa livre de risco anual
+            period (str): Período para análise
+            
+        Returns:
+            dict: Resultado da análise alfa com pesos e estatísticas
+        """
+        try:
+            # Processar tickers
+            tickers = [t.strip().upper() for t in tickers_input.split(',') if t.strip()]
+            
+            if len(tickers) < 2:
+                raise ValueError("Insira pelo menos 2 tickers para análise alfa")
+            
+            # Criar calculador alfa
+            alpha_calc = AlphaWeighting(benchmark=benchmark, risk_free_rate=risk_free_rate)
+            
+            # Calcular pesos
+            weights = alpha_calc.calculate_portfolio_weights(tickers, period)
+            
+            # Obter estatísticas
+            stats = alpha_calc.get_portfolio_stats()
+            
+            # Preparar resultado
+            result = {
+                'weights': weights,
+                'alphas': alpha_calc.alphas,
+                'betas': alpha_calc.betas,
+                'stats': stats,
+                'tickers': tickers
+            }
+            
+            return result
+            
+        except Exception as e:
+            return {
+                'error': f"Erro na análise alfa: {str(e)}",
+                'weights': {ticker: 1.0/len(tickers) for ticker in tickers} if 'tickers' in locals() else {},
+                'alphas': {},
+                'betas': {},
+                'stats': {},
+                'tickers': []
+            }
+
+    def format_alpha_results(self, alpha_result):
+        """
+        Formata resultados da análise alfa para exibição.
+        
+        Args:
+            alpha_result (dict): Resultado da análise alfa
+            
+        Returns:
+            str: Texto formatado com resultados
+        """
+        if 'error' in alpha_result:
+            return f"❌ {alpha_result['error']}"
+        
+        result_text = "# 🎯 ANÁLISE DE PONDERAÇÃO ALFA\n\n"
+        
+        # Informações gerais
+        result_text += f"**Data da análise:** {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        result_text += f"**Ativos analisados:** {', '.join(alpha_result['tickers'])}\n\n"
+        
+        # Estatísticas do portfólio
+        stats = alpha_result['stats']
+        if stats:
+            result_text += "## 📊 Estatísticas do Portfólio:\n\n"
+            result_text += f"- **Alfa Total:** {stats.get('total_alpha', 0):.4f}\n"
+            result_text += f"- **Beta Médio:** {stats.get('average_beta', 0):.4f}\n"
+            result_text += f"- **Número de Ativos:** {stats.get('num_assets', 0)}\n"
+            result_text += f"- **Concentração Máxima:** {stats.get('alpha_concentration', 0):.2%}\n\n"
+        
+        # Detalhes por ativo
+        result_text += "## 📈 Análise por Ativo:\n\n"
+        result_text += "| Ativo | Peso | Alfa | Beta | Status |\n"
+        result_text += "|-------|------|------|------|--------|\n"
+        
+        alphas = alpha_result['alphas']
+        betas = alpha_result['betas']
+        weights = alpha_result['weights']
+        
+        for ticker in alpha_result['tickers']:
+            alpha = alphas.get(ticker, 0)
+            beta = betas.get(ticker, 0)
+            weight = weights.get(ticker, 0)
+            status = "🟢 Outperform" if alpha > 0 else "🔴 Underperform"
+            
+            result_text += f"| **{ticker}** | {weight:.2%} | {alpha:.4f} | {beta:.4f} | {status} |\n"
+        
+        # Interpretação
+        result_text += "\n## 🔍 Interpretação:\n\n"
+        
+        positive_alpha_count = sum(1 for alpha in alphas.values() if alpha > 0)
+        total_assets = len(alphas)
+        
+        if positive_alpha_count > total_assets / 2:
+            result_text += "✅ **Portfólio promissor**: Maioria dos ativos apresenta alfa positivo.\n\n"
+        else:
+            result_text += "⚠️ **Portfólio defensivo**: Maioria dos ativos apresenta alfa negativo ou neutro.\n\n"
+        
+        max_weight_ticker = max(weights.keys(), key=lambda x: weights[x]) if weights else None
+        if max_weight_ticker:
+            result_text += f"🎯 **Maior concentração**: {max_weight_ticker} ({weights[max_weight_ticker]:.2%})\n\n"
+        
+        # Recomendações
+        result_text += "## 💡 Recomendações:\n\n"
+        result_text += "- Use esta ponderação para estratégias long-short\n"
+        result_text += "- Monitore regularmente os alfas (podem mudar no tempo)\n"
+        result_text += "- Considere rebalanceamento trimestral\n"
+        result_text += "- Ativos com alfa negativo podem ser candidatos a short\n\n"
+        
         return result_text
