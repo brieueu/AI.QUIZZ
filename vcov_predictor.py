@@ -18,6 +18,8 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from sklearn.preprocessing import MinMaxScaler
 from alpha_weighting import AlphaWeighting
+from gpt_insights import GPTInsights
+from typing import Dict, List
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -35,6 +37,7 @@ class VCovPredictor:
         """Inicialização do sistema."""
         self.scalers = {}  # Scalers para cada série temporal
         self.model = None
+        self.gpt_insights = GPTInsights()  # Integração com ChatGPT
 
     def predict_vcov_matrix(self, tickers_input, period, window, progress_callback=None):
         """
@@ -365,6 +368,58 @@ class VCovPredictor:
             result_text += f"- **{ticker}**: {vol:.2f}%\n"
 
         return result_text
+
+    def configure_chatgpt(self, api_key: str) -> bool:
+        """
+        Configura a API key do ChatGPT.
+        
+        Args:
+            api_key: Chave da API OpenAI
+            
+        Returns:
+            True se configurada com sucesso
+        """
+        return self.gpt_insights.set_api_key(api_key)
+    
+    def get_vcov_insights(self, vcov_matrix: np.ndarray, tickers: List[str], 
+                         additional_data: Dict = None) -> str:
+        """
+        Gera insights do ChatGPT sobre a matriz V-Cov.
+        
+        Args:
+            vcov_matrix: Matriz de variância-covariância
+            tickers: Lista de tickers
+            additional_data: Dados adicionais para contexto
+            
+        Returns:
+            Insights do ChatGPT
+        """
+        return self.gpt_insights.analyze_vcov_matrix(vcov_matrix, tickers, additional_data)
+    
+    def get_market_commentary(self, tickers: List[str], context: str = "") -> str:
+        """
+        Gera comentário de mercado do ChatGPT.
+        
+        Args:
+            tickers: Lista de tickers
+            context: Contexto adicional
+            
+        Returns:
+            Comentário de mercado
+        """
+        return self.gpt_insights.generate_market_commentary(tickers, context)
+
+    def get_alpha_insights(self, alpha_result: Dict) -> str:
+        """
+        Gera insights do ChatGPT sobre ponderação alfa.
+        
+        Args:
+            alpha_result: Resultado da análise alfa
+            
+        Returns:
+            Insights do ChatGPT sobre alfa
+        """
+        return self.gpt_insights.analyze_alpha_portfolio(alpha_result)
 
     def calculate_alpha_weighted_portfolio(self, tickers_input, benchmark="^GSPC", risk_free_rate=0.02, period="2y"):
         """
