@@ -1,7 +1,7 @@
 # 🚀 Sistema de Predição ```
-# 🚀 Sistema de Predição de Matriz V-Cov com RNN + Ponderação Alfa + ChatGPT
+# 🚀 Sistema de Predição de Matriz V-Cov com RNN + Ponderação Alfa + Gemini AI
 
-Sistema avançado para previsão de matrizes de variância-covariância usando redes neurais LSTM, análise de ponderação baseada em alfa e **insights inteligentes com ChatGPT** para otimização de portfólios quantitativos.
+Sistema avançado para previsão de matrizes de variância-covariância usando redes neurais LSTM, análise de ponderação baseada em alfa e **insights inteligentes com Google AI Studio (Gemini)** para otimização de portfólios quantitativos.
 
 ## 🎯 Funcionalidades Principais
 
@@ -17,36 +17,33 @@ Sistema avançado para previsão de matrizes de variância-covariância usando r
 - **Análise de performance**: Identificação de ativos outperformers
 - **Visualizações avançadas**: Gráficos de pesos e dispersão alfa-beta
 
-### 🤖 **Insights com ChatGPT (NOVO!)**
-- **Comentários de mercado**: Análise contextual dos ativos
-- **Insights V-Cov**: Interpretação profissional das matrizes
-- **Análise de alfa**: Recomendações estratégicas baseadas em IA
-- **Recomendações práticas**: Ações concretas para gestores de portfólio
-
-## 🔧 **Como usar o ChatGPT Integration**
+## 🧠 **Como usar o Gemini AI Integration**
 
 ### 1. **Obter API Key**
-- Acesse: https://platform.openai.com/api-keys
-- Crie uma conta OpenAI ou faça login
+- Acesse: https://makersuite.google.com/app/apikey
+- Faça login com sua conta Google
 - Gere uma nova API key
 
 ### 2. **Configurar no Sistema**
 ```bash
 # Opção A: Variável de ambiente (recomendado)
-export OPENAI_API_KEY="sua_api_key_aqui"
+export GOOGLE_AI_API_KEY="sua_api_key_aqui"
 
 # Opção B: Inserir na interface web
-# Cole a API key no campo "🔑 API Key OpenAI" na aba "🤖 Insights ChatGPT"
+# Cole a API key no campo "🔑 API Key Google AI Studio" na aba "🧠 Insights Gemini AI"
 ```
 
 ### 3. **Funcionalidades Disponíveis**
 - **💬 Comentário de Mercado**: Análise contextual dos ativos escolhidos
 - **🔮 Insights V-Cov**: Interpretação profissional das matrizes de correlação
 - **🎯 Insights Alfa**: Recomendações para ponderação e estratégias
+- **⚠️ Avaliação de Risco**: Assessment completo de risco do portfólio
 
-### 4. **Custos**
-- GPT-3.5-turbo: ~$0.002 por 1K tokens
-- Custo médio por análise: $0.001-0.003.py                  # 🚀 Ponto de entrada da aplicação
+### 4. **Vantagens do Gemini**
+- ✅ Geralmente mais acessível que OpenAI
+- ✅ Limite de tokens maior por requisição
+- ✅ Excelente para análises detalhadas
+- ✅ Suporte nativo do Google.py                  # 🚀 Ponto de entrada da aplicação
 ├── vcov_predictor.py        # 🧮 Core ML: LSTM + V-Cov + Alfa
 ├── gradio_interface.py      # 🌐 Interface web com Gradio
 ├── alpha_weighting.py       # 🎯 Módulo de ponderação alfa

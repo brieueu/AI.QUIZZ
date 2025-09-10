@@ -10,6 +10,7 @@ Especialização: Python, TensorFlow/Keras, Análise Quantitativa
 """
 
 import gradio as gr
+import pandas as pd
 import plotly.graph_objects as go
 from vcov_predictor import VCovPredictor
 
@@ -85,36 +86,43 @@ class GradioInterface:
             empty_fig = go.Figure()
             return empty_fig, empty_fig, error_msg
     
-    def chatgpt_insights_wrapper(self, tickers, openai_key, analysis_type):
-        """Wrapper para insights do ChatGPT."""
+    def gemini_insights_wrapper(self, tickers, gemini_key, analysis_type):
+        """Wrapper para insights do Gemini AI."""
         try:
-            if not openai_key.strip():
-                return "❌ **Erro**: Por favor, insira sua API key do OpenAI"
+            if not gemini_key.strip():
+                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio"
             
             # Configurar API key
-            success = self.predictor.configure_chatgpt(openai_key.strip())
+            success = self.predictor.configure_gemini(gemini_key.strip())
             if not success:
-                return "❌ **Erro**: API key inválida ou erro de conexão"
+                return "❌ **Erro**: API key inválida ou erro de conexão com Google AI Studio"
             
             tickers_list = [t.strip().upper() for t in tickers.split(',') if t.strip()]
             
             if analysis_type == "Comentário de Mercado":
                 context = f"Análise de mercado para portfólio de {len(tickers_list)} ativos"
-                return self.predictor.get_market_commentary(tickers_list, context)
+                return self.predictor.get_market_commentary_gemini(tickers_list, context)
+            elif analysis_type == "Avaliação de Risco":
+                portfolio_data = {
+                    'tickers': tickers_list,
+                    'num_assets': len(tickers_list),
+                    'analysis_date': pd.Timestamp.now().strftime('%Y-%m-%d')
+                }
+                return self.predictor.get_risk_assessment_gemini(tickers_list, portfolio_data)
             else:
                 return "❌ **Erro**: Tipo de análise não suportado"
                 
         except Exception as e:
-            return f"❌ **Erro nos insights**: {str(e)}"
+            return f"❌ **Erro nos insights Gemini**: {str(e)}"
     
-    def vcov_insights_wrapper(self, tickers, period, window, openai_key):
-        """Wrapper para insights V-Cov do ChatGPT."""
+    def gemini_vcov_insights_wrapper(self, tickers, period, window, gemini_key):
+        """Wrapper para insights V-Cov do Gemini."""
         try:
-            if not openai_key.strip():
-                return "❌ **Erro**: Por favor, insira sua API key do OpenAI para insights"
+            if not gemini_key.strip():
+                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio para insights"
             
             # Configurar API key
-            success = self.predictor.configure_chatgpt(openai_key.strip())
+            success = self.predictor.configure_gemini(gemini_key.strip())
             if not success:
                 return "❌ **Erro**: API key inválida ou erro de conexão"
             
@@ -130,26 +138,26 @@ class GradioInterface:
             additional_data = {
                 'period_years': int(period),
                 'window_days': int(window),
-                'prediction_date': result.get('prediction_date', 'N/A')
+                'prediction_date': pd.Timestamp.now().strftime('%Y-%m-%d')
             }
             
-            return self.predictor.get_vcov_insights(
+            return self.predictor.get_vcov_insights_gemini(
                 result['vcov_matrix'], 
                 result['tickers'],
                 additional_data
             )
             
         except Exception as e:
-            return f"❌ **Erro nos insights V-Cov**: {str(e)}"
+            return f"❌ **Erro nos insights V-Cov Gemini**: {str(e)}"
     
-    def alpha_insights_wrapper(self, tickers_input, benchmark, risk_free_rate, openai_key):
-        """Wrapper para insights de ponderação alfa do ChatGPT."""
+    def gemini_alpha_insights_wrapper(self, tickers_input, benchmark, risk_free_rate, gemini_key):
+        """Wrapper para insights de ponderação alfa do Gemini."""
         try:
-            if not openai_key.strip():
-                return "❌ **Erro**: Por favor, insira sua API key do OpenAI para insights"
+            if not gemini_key.strip():
+                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio para insights"
             
             # Configurar API key
-            success = self.predictor.configure_chatgpt(openai_key.strip())
+            success = self.predictor.configure_gemini(gemini_key.strip())
             if not success:
                 return "❌ **Erro**: API key inválida ou erro de conexão"
             
@@ -164,10 +172,10 @@ class GradioInterface:
             )
             
             # Gerar insights
-            return self.predictor.get_alpha_insights(alpha_result)
+            return self.predictor.get_alpha_insights_gemini(alpha_result)
             
         except Exception as e:
-            return f"❌ **Erro nos insights alfa**: {str(e)}"
+            return f"❌ **Erro nos insights alfa Gemini**: {str(e)}"
     
     def _create_weights_chart(self, alpha_result):
         """Cria gráfico de barras com os pesos calculados."""
@@ -423,75 +431,75 @@ class GradioInterface:
                                         label="Dispersão Alfa vs Beta"
                                     )
                 
-                with gr.TabItem("🤖 Insights ChatGPT"):
-                    gr.Markdown("## 🧠 Análises Inteligentes com ChatGPT")
-                    gr.Markdown("*Configure sua API key do OpenAI para obter insights profissionais sobre seus dados financeiros*")
+                with gr.TabItem("🧠 Insights Gemini AI"):
+                    gr.Markdown("## 🤖 Análises Inteligentes com Google AI Studio")
+                    gr.Markdown("*Configure sua API key do Google AI Studio para obter insights profissionais de IA sobre seus dados financeiros*")
                     
                     with gr.Row():
-                        openai_key_input = gr.Textbox(
-                            label="🔑 API Key OpenAI",
-                            placeholder="sk-...",
+                        gemini_key_input = gr.Textbox(
+                            label="🔑 API Key Google AI Studio",
+                            placeholder="Digite sua API key aqui...",
                             type="password",
-                            info="Sua chave da API OpenAI para gerar insights"
+                            info="Sua chave da API do Google AI Studio para gerar insights"
                         )
                     
                     with gr.Tabs():
                         with gr.TabItem("💬 Comentário de Mercado"):
                             with gr.Row():
                                 with gr.Column(scale=1):
-                                    market_tickers_input = gr.Textbox(
+                                    gemini_market_tickers_input = gr.Textbox(
                                         label="Ativos para análise",
                                         value="AAPL, GOOGL, MSFT, AMZN",
                                         placeholder="Ex: AAPL, MSFT, TSLA"
                                     )
                                     
-                                    market_analysis_type = gr.Dropdown(
+                                    gemini_analysis_type = gr.Dropdown(
                                         label="Tipo de análise",
-                                        choices=["Comentário de Mercado"],
+                                        choices=["Comentário de Mercado", "Avaliação de Risco"],
                                         value="Comentário de Mercado"
                                     )
                                     
-                                    market_btn = gr.Button(
-                                        "📰 Gerar Comentário",
+                                    gemini_market_btn = gr.Button(
+                                        "📊 Gerar Análise Gemini",
                                         variant="secondary",
                                         size="lg"
                                     )
                                 
                                 with gr.Column(scale=2):
-                                    market_insights_output = gr.Markdown(
-                                        value="Configure a API key e clique em 'Gerar Comentário'...",
+                                    gemini_market_insights_output = gr.Markdown(
+                                        value="Configure a API key e clique em 'Gerar Análise Gemini'...",
                                         height=500
                                     )
                         
                         with gr.TabItem("🔮 Insights V-Cov"):
                             with gr.Row():
                                 with gr.Column(scale=1):
-                                    vcov_insights_tickers = gr.Textbox(
+                                    gemini_vcov_tickers = gr.Textbox(
                                         label="Tickers para V-Cov",
                                         value="AAPL, GOOGL, MSFT",
                                         placeholder="Ex: AAPL, GOOGL, MSFT"
                                     )
                                     
-                                    vcov_insights_period = gr.Textbox(
+                                    gemini_vcov_period = gr.Textbox(
                                         label="Período (anos)",
                                         value="3",
                                         placeholder="Ex: 3"
                                     )
                                     
-                                    vcov_insights_window = gr.Textbox(
+                                    gemini_vcov_window = gr.Textbox(
                                         label="Janela (dias)",
                                         value="60",
                                         placeholder="Ex: 60"
                                     )
                                     
-                                    vcov_insights_btn = gr.Button(
-                                        "🔍 Analisar V-Cov",
+                                    gemini_vcov_btn = gr.Button(
+                                        "🔍 Analisar V-Cov com Gemini",
                                         variant="secondary",
                                         size="lg"
                                     )
                                 
                                 with gr.Column(scale=2):
-                                    vcov_insights_output = gr.Markdown(
+                                    gemini_vcov_insights_output = gr.Markdown(
                                         value="Configure a API key e parâmetros, depois clique em 'Analisar V-Cov'...",
                                         height=500
                                     )
@@ -499,32 +507,32 @@ class GradioInterface:
                         with gr.TabItem("🎯 Insights Alfa"):
                             with gr.Row():
                                 with gr.Column(scale=1):
-                                    alpha_insights_tickers = gr.Textbox(
+                                    gemini_alpha_tickers = gr.Textbox(
                                         label="Tickers para análise alfa",
                                         value="AAPL, GOOGL, MSFT, AMZN, TSLA",
                                         placeholder="Ex: AAPL, GOOGL, MSFT"
                                     )
                                     
-                                    alpha_insights_benchmark = gr.Textbox(
+                                    gemini_alpha_benchmark = gr.Textbox(
                                         label="Benchmark",
                                         value="^GSPC",
                                         placeholder="^GSPC"
                                     )
                                     
-                                    alpha_insights_risk_free = gr.Textbox(
+                                    gemini_alpha_risk_free = gr.Textbox(
                                         label="Taxa livre de risco (%)",
                                         value="2.0",
                                         placeholder="2.0"
                                     )
                                     
-                                    alpha_insights_btn = gr.Button(
-                                        "🧮 Analisar Alfa",
+                                    gemini_alpha_btn = gr.Button(
+                                        "🧮 Analisar Alfa com Gemini",
                                         variant="secondary",
                                         size="lg"
                                     )
                                 
                                 with gr.Column(scale=2):
-                                    alpha_insights_output = gr.Markdown(
+                                    gemini_alpha_insights_output = gr.Markdown(
                                         value="Configure a API key e parâmetros, depois clique em 'Analisar Alfa'...",
                                         height=500
                                     )
@@ -545,25 +553,25 @@ class GradioInterface:
                 show_progress=True
             )
             
-            # Conectar eventos ChatGPT
-            market_btn.click(
-                fn=self.chatgpt_insights_wrapper,
-                inputs=[market_tickers_input, openai_key_input, market_analysis_type],
-                outputs=[market_insights_output],
+            # Conectar eventos Gemini AI
+            gemini_market_btn.click(
+                fn=self.gemini_insights_wrapper,
+                inputs=[gemini_market_tickers_input, gemini_key_input, gemini_analysis_type],
+                outputs=[gemini_market_insights_output],
                 show_progress=True
             )
             
-            vcov_insights_btn.click(
-                fn=self.vcov_insights_wrapper,
-                inputs=[vcov_insights_tickers, vcov_insights_period, vcov_insights_window, openai_key_input],
-                outputs=[vcov_insights_output],
+            gemini_vcov_btn.click(
+                fn=self.gemini_vcov_insights_wrapper,
+                inputs=[gemini_vcov_tickers, gemini_vcov_period, gemini_vcov_window, gemini_key_input],
+                outputs=[gemini_vcov_insights_output],
                 show_progress=True
             )
             
-            alpha_insights_btn.click(
-                fn=self.alpha_insights_wrapper,
-                inputs=[alpha_insights_tickers, alpha_insights_benchmark, alpha_insights_risk_free, openai_key_input],
-                outputs=[alpha_insights_output],
+            gemini_alpha_btn.click(
+                fn=self.gemini_alpha_insights_wrapper,
+                inputs=[gemini_alpha_tickers, gemini_alpha_benchmark, gemini_alpha_risk_free, gemini_key_input],
+                outputs=[gemini_alpha_insights_output],
                 show_progress=True
             )
         

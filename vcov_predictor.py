@@ -18,7 +18,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from sklearn.preprocessing import MinMaxScaler
 from alpha_weighting import AlphaWeighting
-from gpt_insights import GPTInsights
+from gemini_insights import GeminiInsights
 from typing import Dict, List
 import warnings
 
@@ -37,7 +37,7 @@ class VCovPredictor:
         """Inicialização do sistema."""
         self.scalers = {}  # Scalers para cada série temporal
         self.model = None
-        self.gpt_insights = GPTInsights()  # Integração com ChatGPT
+        self.gemini_insights = GeminiInsights()  # Integração com Gemini AI
 
     def predict_vcov_matrix(self, tickers_input, period, window, progress_callback=None):
         """
@@ -369,22 +369,22 @@ class VCovPredictor:
 
         return result_text
 
-    def configure_chatgpt(self, api_key: str) -> bool:
+    def configure_gemini(self, api_key: str) -> bool:
         """
-        Configura a API key do ChatGPT.
+        Configura a API key do Google AI Studio.
         
         Args:
-            api_key: Chave da API OpenAI
+            api_key: Chave da API Google AI Studio
             
         Returns:
             True se configurada com sucesso
         """
-        return self.gpt_insights.set_api_key(api_key)
+        return self.gemini_insights.set_api_key(api_key)
     
-    def get_vcov_insights(self, vcov_matrix: np.ndarray, tickers: List[str], 
-                         additional_data: Dict = None) -> str:
+    def get_vcov_insights_gemini(self, vcov_matrix: np.ndarray, tickers: List[str], 
+                               additional_data: Dict = None) -> str:
         """
-        Gera insights do ChatGPT sobre a matriz V-Cov.
+        Gera insights do Gemini sobre a matriz V-Cov.
         
         Args:
             vcov_matrix: Matriz de variância-covariância
@@ -392,13 +392,13 @@ class VCovPredictor:
             additional_data: Dados adicionais para contexto
             
         Returns:
-            Insights do ChatGPT
+            Insights do Gemini
         """
-        return self.gpt_insights.analyze_vcov_matrix(vcov_matrix, tickers, additional_data)
+        return self.gemini_insights.analyze_vcov_matrix(vcov_matrix, tickers, additional_data)
     
-    def get_market_commentary(self, tickers: List[str], context: str = "") -> str:
+    def get_market_commentary_gemini(self, tickers: List[str], context: str = "") -> str:
         """
-        Gera comentário de mercado do ChatGPT.
+        Gera comentário de mercado do Gemini.
         
         Args:
             tickers: Lista de tickers
@@ -407,19 +407,32 @@ class VCovPredictor:
         Returns:
             Comentário de mercado
         """
-        return self.gpt_insights.generate_market_commentary(tickers, context)
+        return self.gemini_insights.generate_market_commentary(tickers, context)
 
-    def get_alpha_insights(self, alpha_result: Dict) -> str:
+    def get_alpha_insights_gemini(self, alpha_result: Dict) -> str:
         """
-        Gera insights do ChatGPT sobre ponderação alfa.
+        Gera insights do Gemini sobre ponderação alfa.
         
         Args:
             alpha_result: Resultado da análise alfa
             
         Returns:
-            Insights do ChatGPT sobre alfa
+            Insights do Gemini sobre alfa
         """
-        return self.gpt_insights.analyze_alpha_portfolio(alpha_result)
+        return self.gemini_insights.analyze_alpha_portfolio(alpha_result)
+    
+    def get_risk_assessment_gemini(self, tickers: List[str], portfolio_data: Dict) -> str:
+        """
+        Gera avaliação de risco do Gemini.
+        
+        Args:
+            tickers: Lista de tickers
+            portfolio_data: Dados do portfólio
+            
+        Returns:
+            Avaliação de risco detalhada
+        """
+        return self.gemini_insights.generate_risk_assessment(tickers, portfolio_data)
 
     def calculate_alpha_weighted_portfolio(self, tickers_input, benchmark="^GSPC", risk_free_rate=0.02, period="2y"):
         """
