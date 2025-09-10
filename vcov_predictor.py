@@ -147,27 +147,43 @@ class VCovPredictor:
         end_date = pd.Timestamp.now()
         start_date = end_date - pd.DateOffset(years=period)
 
-        data = yf.download(
-            tickers,
-            start=start_date,
-            end=end_date,
-            progress=False
-        )
+        try:
+            data = yf.download(
+                tickers,
+                start=start_date,
+                end=end_date,
+                progress=False,
+                auto_adjust=True
+            )
 
-        # Tratar caso de ticker único
-        if len(tickers) == 1:
-            prices = data['Close'].to_frame()
-            prices.columns = tickers
-        else:
-            prices = data['Close']
+            # Verificar se os dados foram baixados com sucesso
+            if data is None or data.empty:
+                raise ValueError("Nenhum dado foi baixado do yfinance")
+            
+            # Verificar se a coluna 'Close' existe
+            if 'Close' not in data.columns.get_level_values(0):
+                raise ValueError("Coluna 'Close' não encontrada nos dados baixados")
 
-        # Remover dados faltantes
-        prices = prices.dropna()
+            # Tratar caso de ticker único
+            if len(tickers) == 1:
+                if isinstance(data['Close'], pd.Series):
+                    prices = data['Close'].to_frame()
+                    prices.columns = tickers
+                else:
+                    prices = data['Close']
+            else:
+                prices = data['Close']
 
-        if prices.empty:
-            raise ValueError("Nenhum dado válido encontrado para os tickers fornecidos")
+            # Remover dados faltantes
+            prices = prices.dropna()
 
-        return prices
+            if prices.empty:
+                raise ValueError("Nenhum dado válido encontrado para os tickers fornecidos")
+
+            return prices
+            
+        except Exception as e:
+            raise ValueError(f"Erro ao baixar dados: {str(e)}")
 
     def _calculate_rolling_vcov(self, returns, window):
         """Calcula matrizes de V-Cov em janela deslizante."""

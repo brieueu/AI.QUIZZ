@@ -61,18 +61,41 @@ class AlphaWeighting:
         
         try:
             # Baixar todos os dados de uma vez
-            raw_data = yf.download(all_symbols, period=period, progress=False)['Adj Close']
+            raw_data = yf.download(all_symbols, period=period, progress=False, auto_adjust=True)
             
-            if isinstance(raw_data, pd.Series):
+            # Verificar se os dados foram baixados com sucesso
+            if raw_data is None or raw_data.empty:
+                print(f"❌ Erro: Nenhum dado foi baixado")
+                return {}
+            
+            # Com auto_adjust=True, usar coluna 'Close' (já ajustada)
+            if 'Close' not in raw_data.columns.get_level_values(0):
+                print(f"❌ Erro: Coluna 'Close' não encontrada nos dados")
+                return {}
+            
+            # Extrair preços ajustados (Close com auto_adjust=True equivale ao antigo Adj Close)
+            close_data = raw_data['Close']
+            
+            if isinstance(close_data, pd.Series):
                 # Caso seja apenas um ativo
-                data[all_symbols[0]] = raw_data.to_frame()
+                data[all_symbols[0]] = close_data.to_frame()
             else:
                 for symbol in all_symbols:
-                    if symbol in raw_data.columns:
-                        data[symbol] = raw_data[symbol].dropna()
+                    if symbol in close_data.columns:
+                        symbol_data = close_data[symbol].dropna()
+                        if not symbol_data.empty:
+                            data[symbol] = symbol_data
+                        else:
+                            print(f"⚠️ Dados vazios para {symbol}")
+                    else:
+                        print(f"⚠️ Símbolo {symbol} não encontrado nos dados")
                     
-        except Exception as e:
+        except KeyError as e:
             print(f"❌ Erro ao baixar dados: {e}")
+            print("Possível causa: ticker inválido ou dados indisponíveis")
+            return {}
+        except Exception as e:
+            print(f"❌ Erro inesperado ao baixar dados: {e}")
             return {}
             
         print(f"✅ Dados baixados com sucesso!")
