@@ -1,99 +1,84 @@
-# Configuração do Google AI Studio (Gemini) Integration
-# ==================================================
+# Configuração Google AI Studio (Gemini)
 
-# Para usar a integração com Google AI Studio, você precisa:
+## 🔑 Como obter uma API Key
 
-## 1. Obter uma API Key do Google AI Studio
-#    - Acesse: https://makersuite.google.com/app/apikey
-#    - Faça login com sua conta Google
-#    - Crie uma nova API key
-#    - Copie a chave gerada
+1. **Acesse**: https://aistudio.google.com/app/apikey
+2. **Faça login** com sua conta Google
+3. **Clique em** "Create API Key"
+4. **Copie** a chave gerada (formato: `AIzaSy...`)
 
-## 2. Configurar a API Key (escolha uma opção):
+## 🚀 Como configurar
 
-### Opção A: Variável de ambiente (recomendado)
-# export GOOGLE_AI_API_KEY="sua_api_key_aqui"
+### Método 1: Variável de Ambiente (Recomendado)
+```bash
+export GOOGLE_AI_API_KEY="sua_api_key_real_aqui"
+```
 
-### Opção B: Inserir diretamente na interface
-# Cole sua API key no campo "🔑 API Key Google AI Studio" na aba "🧠 Insights Gemini AI"
+### Método 2: Interface Web (Mais Comum)
+1. Acesse `http://localhost:7862`
+2. Vá para "🧠 Insights Gemini AI"  
+3. Digite sua API Key no campo "🔑 API Key Google AI Studio"
+4. Use qualquer funcionalidade do Gemini
 
-## 3. Vantagens do Gemini vs OpenAI
-# ✅ Geralmente mais barato que GPT-3.5/4
-# ✅ Limite de tokens maior por requisição
-# ✅ Excelente para análises longas e detalhadas
-# ✅ Suporte nativo do Google
-# ✅ Performance competitiva em tarefas financeiras
+## 📋 Funcionalidades Disponíveis
 
-## 4. Modelos Disponíveis:
-# - gemini-pro: Modelo principal (usado neste sistema)
-# - gemini-pro-vision: Para análise de imagens
-# - Text-to-speech e outras funcionalidades futuras
+### 💬 Comentário de Mercado
+- Análises inteligentes sobre ativos selecionados
+- Tendências de mercado e setoriais
+- Riscos e oportunidades identificados
+- Outlook de curto e médio prazo
 
-## 5. Custos (estimados):
-# - Gemini Pro: Muito competitivo vs OpenAI
-# - Primeira camada gratuita generosa
-# - Pricing transparente no Google Cloud
+### 🔮 Insights V-Cov
+- Interpretação profissional de matrizes de covariância
+- Análise de risco e diversificação
+- Identificação de concentrações perigosas
+- Recomendações de otimização de portfólio
 
-## 6. Recursos Disponíveis:
-# ✅ 💬 Comentário de mercado contextual
-# ✅ 🔮 Análise profunda de matrizes V-Cov  
-# ✅ 🎯 Insights estratégicos sobre ponderação alfa
-# ✅ ⚠️ Avaliação detalhada de risco de portfólio
-# ✅ 🧠 Recomendações práticas para gestores
+### 🎯 Insights Alfa
+- Análise especializada de performance alfa/beta
+- Interpretação de métricas CAPM
+- Identificação de geradores de alfa
+- Estratégias de investimento recomendadas
 
-## 7. Exemplo de uso:
-# 1. Obtenha sua API key em: https://makersuite.google.com/app/apikey
-# 2. Configure como variável de ambiente ou insira na interface
-# 3. Vá para a aba "🧠 Insights Gemini AI"
-# 4. Escolha o tipo de análise desejada
-# 5. Insira os tickers dos ativos
-# 6. Clique no botão correspondente
-# 7. Aguarde a análise detalhada do Gemini!
+### 🤖 Modelos Disponíveis
+- Lista completa de modelos Gemini disponíveis
+- Informações sobre capacidades e limites
+- Recomendações de uso por tipo de análise
 
-## 8. Tipos de Análise Disponíveis:
+## ⚠️ Informações Importantes
 
-### 💬 Comentário de Mercado:
-# - Análise setorial e contextual
-# - Perspectivas individuais por ativo
-# - Correlações e diversificação
-# - Outlook de curto/médio prazo
-# - Fatores de risco e oportunidades
+- **Modelos Atualizados**: Sistema usa gemini-1.5-pro, gemini-1.5-flash, ou gemini-2.0-flash-exp
+- **Modelo Antigo**: gemini-pro foi descontinuado pela Google
+- **Gratuito**: Google AI Studio oferece cota gratuita generosa
+- **Rate Limits**: Respeite os limites (2 req/min para 1.5-pro, 15 req/min para 1.5-flash)
+- **Privacidade**: API key não é armazenada permanentemente
+- **Qualidade**: Gemini 1.5 Pro é otimizado para análises complexas (contexto de 2M tokens)
 
-### 🔮 Insights V-Cov:
-# - Interpretação profissional das correlações
-# - Análise de volatilidades e riscos
-# - Estratégias de diversificação
-# - Recomendações de hedge
-# - Alertas e monitoramento
+## ⚡ Teste Rápido
+```python
+from vcov_predictor import VCovPredictor
+predictor = VCovPredictor()
 
-### 🎯 Insights Alfa:
-# - Análise de performance vs benchmark
-# - Estratégias long/short otimizadas
-# - Implementação prática de pesos
-# - Considerações de risco específicas
-# - Frequência de rebalanceamento
+# Configurar API key
+predictor.configure_gemini("sua_api_key_aqui")
 
-### ⚠️ Avaliação de Risco:
-# - Classificação de perfil de risco
-# - Análise de concentrações
-# - Stress testing e cenários
-# - VaR e métricas quantitativas
-# - Planos de contingência
+# Testar listagem de modelos
+modelos = predictor.list_gemini_models()
+print(modelos)
 
-## Segurança:
-# ⚠️  Nunca commite sua API key no repositório
-# ✅ Use variáveis de ambiente ou insira manualmente
-# ✅ Mantenha sua API key privada e segura
-# ✅ Monitore uso e custos no Google Cloud Console
+# Testar comentário de mercado
+comentario = predictor.get_market_commentary(["AAPL", "GOOGL", "MSFT"])
+print(comentario)
+```
 
-## Suporte:
-# Em caso de problemas, verifique:
-# - Conectividade com internet
-# - Validade da API key no Google AI Studio
-# - Limites de rate e quota
-# - Status dos serviços Google AI
+## 🚫 Integração ChatGPT Removida
+- Sistema agora usa apenas Google AI Studio (Gemini)
+- Focamos em uma única integração de IA de alta qualidade
+- Reduzimos complexidade e melhoramos confiabilidade
+- **Atualizado**: Modelos Gemini 1.5/2.0 com capacidades expandidas
 
-## Links úteis:
-# - Google AI Studio: https://makersuite.google.com
-# - Documentação: https://developers.generativeai.google
-# - Pricing: https://cloud.google.com/generative-ai-app-builder/pricing
+## 🔄 Modelos Suportados
+- **gemini-1.5-pro**: Análises complexas, contexto 2M tokens
+- **gemini-1.5-flash**: Análises rápidas, contexto 1M tokens  
+- **gemini-2.0-flash-exp**: Modelo experimental mais recente
+- **Fallback automático**: Sistema tenta diferentes modelos se um falhar

@@ -1,7 +1,6 @@
-# 🚀 Sistema de Predição ```
-# 🚀 Sistema de Predição de Matriz V-Cov com RNN + Ponderação Alfa + Gemini AI
+# 🚀 Sistema de Predição de Matriz V-Cov com RNN + Insights Gemini AI
 
-Sistema avançado para previsão de matrizes de variância-covariância usando redes neurais LSTM, análise de ponderação baseada em alfa e **insights inteligentes com Google AI Studio (Gemini)** para otimização de portfólios quantitativos.
+Sistema avançado para previsão de matrizes de variância-covariância usando redes neurais LSTM, análise de ponderação baseada em alfa e insights inteligentes com Google AI Studio (Gemini).
 
 ## 🎯 Funcionalidades Principais
 
@@ -17,38 +16,24 @@ Sistema avançado para previsão de matrizes de variância-covariância usando r
 - **Análise de performance**: Identificação de ativos outperformers
 - **Visualizações avançadas**: Gráficos de pesos e dispersão alfa-beta
 
-## 🧠 **Como usar o Gemini AI Integration**
+### 🧠 Insights Gemini AI ⭐ **NOVO!**
+- **💬 Comentário de Mercado**: Análises inteligentes sobre ativos selecionados
+- **🔮 Insights V-Cov**: Interpretação profissional de matrizes de covariância
+- **🎯 Insights Alfa**: Análise especializada de performance de portfólio
+- **🤖 Modelos Disponíveis**: Lista e informações dos modelos Gemini disponíveis
 
-### 1. **Obter API Key**
-- Acesse: https://makersuite.google.com/app/apikey
-- Faça login com sua conta Google
-- Gere uma nova API key
+## 🏗️ Arquitetura do Sistema
 
-### 2. **Configurar no Sistema**
-```bash
-# Opção A: Variável de ambiente (recomendado)
-export GOOGLE_AI_API_KEY="sua_api_key_aqui"
-
-# Opção B: Inserir na interface web
-# Cole a API key no campo "🔑 API Key Google AI Studio" na aba "🧠 Insights Gemini AI"
 ```
-
-### 3. **Funcionalidades Disponíveis**
-- **💬 Comentário de Mercado**: Análise contextual dos ativos escolhidos
-- **🔮 Insights V-Cov**: Interpretação profissional das matrizes de correlação
-- **🎯 Insights Alfa**: Recomendações para ponderação e estratégias
-- **⚠️ Avaliação de Risco**: Assessment completo de risco do portfólio
-
-### 4. **Vantagens do Gemini**
-- ✅ Geralmente mais acessível que OpenAI
-- ✅ Limite de tokens maior por requisição
-- ✅ Excelente para análises detalhadas
-- ✅ Suporte nativo do Google.py                  # 🚀 Ponto de entrada da aplicação
-├── vcov_predictor.py        # 🧮 Core ML: LSTM + V-Cov + Alfa
+projeto/
+├── main.py                  # 🚀 Ponto de entrada da aplicação
+├── vcov_predictor.py        # 🧮 Core ML: LSTM + V-Cov + Alfa + Gemini
 ├── gradio_interface.py      # 🌐 Interface web com Gradio
 ├── alpha_weighting.py       # 🎯 Módulo de ponderação alfa
+├── gemini_insights.py       # 🧠 Integração Google AI Studio
 ├── requirements.txt         # 📦 Dependências do projeto
 ├── .gitignore              # 🚫 Arquivos ignorados pelo Git
+├── GEMINI_CONFIG.md        # 🔑 Configuração Gemini AI
 └── README.md               # 📖 Documentação
 ```
 
@@ -59,6 +44,7 @@ export GOOGLE_AI_API_KEY="sua_api_key_aqui"
 - **Métodos LSTM**: Modelagem temporal de volatilidades
 - **Decomposição de Cholesky**: Garantia matemática de consistência
 - **Integração Alfa**: Cálculos de ponderação baseados em performance
+- **Integração Gemini**: Métodos para análise inteligente com IA
 
 #### `alpha_weighting.py` - Sistema de Ponderação Alfa
 - **AlphaWeighting**: Classe para análise de alfa/beta
@@ -66,31 +52,19 @@ export GOOGLE_AI_API_KEY="sua_api_key_aqui"
 - **Otimização de pesos**: Distribuição baseada na capacidade de alfa
 - **Análise estatística**: Métricas de performance do portfólio
 
+#### `gemini_insights.py` - Sistema de IA ⭐
+- **GeminiInsights**: Classe principal para insights de IA
+- **Análise V-Cov**: Interpretação inteligente de matrizes
+- **Análise Alfa**: Insights sobre performance de portfólio
+- **Comentários de Mercado**: Análises contextuais automatizadas
+- **Listagem de Modelos**: Informações sobre modelos disponíveis
+
 #### `gradio_interface.py` - Interface Web
-- **Interface dupla**: Abas separadas para V-Cov e Ponderação Alfa
+- **Interface tripla**: Abas para V-Cov, Ponderação Alfa e Insights Gemini
 - **Visualizações avançadas**: Plotly para gráficos interativos
 - **UX otimizada**: Design responsivo e intuitivo
-- **Feedback em tempo real**: Progress bars e status updatescom RNN + Ponderação Alfa
-
-Sistema avançado para previsão de matrizes de variância-covariância usando redes neurais LSTM e análise de ponderação baseada em alfa para otimização de portfólios quantitativos.
-
-## 🎯 Funcionalidades Principais
-
-### 📈 Predição de Matriz V-Cov
-- **Redes LSTM**: Modelagem temporal de correlações e volatilidades
-- **Decomposição de Cholesky**: Garantia de matrizes positivas definidas
-- **Dados em tempo real**: Integração com Yahoo Finance API
-- **Visualizações interativas**: Heatmaps de correlação e V-Cov
-
-### 🎯 Ponderação Alfa (NOVO!)
-- **Cálculo de Alfa/Beta**: Análise CAPM para cada ativo
-- **Otimização automática**: Pesos baseados na capacidade de geração de alfa
-- **Análise de performance**: Identificação de ativos outperformers
-- **Visualizações avançadas**: Gráficos de pesos e dispersão alfa-beta
-
-## 🏗️ Arquitetura do SistemaMatriz V-Cov com RNN
-
-Sistema avançado para previsão de matrizes de variância-covariância usando decomposição de Cholesky e redes neurais LSTM.
+- **Feedback em tempo real**: Progress bars e status updates
+- **Integração IA**: Interface completa para funcionalidades Gemini
 
 ## 📁 Estrutura do Projeto
 

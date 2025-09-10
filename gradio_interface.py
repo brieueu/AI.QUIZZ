@@ -10,7 +10,6 @@ Especialização: Python, TensorFlow/Keras, Análise Quantitativa
 """
 
 import gradio as gr
-import pandas as pd
 import plotly.graph_objects as go
 from vcov_predictor import VCovPredictor
 
@@ -57,6 +56,104 @@ class GradioInterface:
         # Resultado final
         return vcov_fig, corr_fig, result['result_text']
     
+    def gemini_insights_wrapper(self, tickers, gemini_key, analysis_type):
+        """Wrapper para insights de mercado do Gemini."""
+        try:
+            if not gemini_key.strip():
+                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio"
+            
+            # Configurar API key
+            success = self.predictor.configure_gemini(gemini_key.strip())
+            if not success:
+                return "❌ **Erro**: API key inválida ou erro de conexão"
+            
+            # Processar tickers
+            tickers_list = [t.strip().upper() for t in tickers.split(',') if t.strip()]
+            
+            if analysis_type == "Comentário de Mercado":
+                return self.predictor.get_market_commentary(tickers_list)
+            else:  # Avaliação de Risco
+                portfolio_data = {"tickers": tickers_list, "tipo": "análise_risco"}
+                return self.predictor.gemini_insights.generate_risk_assessment(tickers_list, portfolio_data)
+            
+        except Exception as e:
+            return f"❌ **Erro nos insights de mercado Gemini**: {str(e)}"
+    
+    def gemini_vcov_insights_wrapper(self, tickers, period, window, gemini_key):
+        """Wrapper para insights V-Cov do Gemini."""
+        try:
+            if not gemini_key.strip():
+                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio"
+            
+            # Configurar API key
+            success = self.predictor.configure_gemini(gemini_key.strip())
+            if not success:
+                return "❌ **Erro**: API key inválida ou erro de conexão"
+            
+            # Executar predição V-Cov primeiro
+            result = self.predictor.predict_vcov_matrix(tickers, int(period), int(window))
+            
+            if not result['success']:
+                return f"❌ **Erro na predição V-Cov**: {result['result_text']}"
+            
+            # Gerar insights com Gemini
+            additional_data = {
+                "periodo_anos": period,
+                "janela_dias": window,
+                "data_predicao": result.get('timestamp', 'N/A')
+            }
+            
+            return self.predictor.get_vcov_insights(
+                result['vcov_matrix'], 
+                result['tickers'], 
+                additional_data
+            )
+            
+        except Exception as e:
+            return f"❌ **Erro nos insights V-Cov Gemini**: {str(e)}"
+    
+    def gemini_alpha_insights_wrapper(self, tickers_input, benchmark, risk_free_rate, gemini_key):
+        """Wrapper para insights alfa do Gemini."""
+        try:
+            if not gemini_key.strip():
+                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio"
+            
+            # Configurar API key
+            success = self.predictor.configure_gemini(gemini_key.strip())
+            if not success:
+                return "❌ **Erro**: API key inválida ou erro de conexão"
+            
+            # Executar análise alfa primeiro
+            alpha_result = self.predictor.alpha_weighting_analysis(
+                tickers_input, benchmark, float(risk_free_rate)
+            )
+            
+            if not alpha_result['success']:
+                return f"❌ **Erro na análise alfa**: {alpha_result['result_text']}"
+            
+            # Gerar insights com Gemini
+            return self.predictor.get_alpha_insights(alpha_result)
+            
+        except Exception as e:
+            return f"❌ **Erro nos insights alfa Gemini**: {str(e)}"
+    
+    def list_gemini_models_wrapper(self, gemini_key):
+        """Wrapper para listar modelos do Gemini AI."""
+        try:
+            if not gemini_key.strip():
+                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio para listar modelos"
+            
+            # Configurar API key
+            success = self.predictor.configure_gemini(gemini_key.strip())
+            if not success:
+                return "❌ **Erro**: API key inválida ou erro de conexão"
+            
+            # Listar modelos
+            return self.predictor.list_gemini_models()
+            
+        except Exception as e:
+            return f"❌ **Erro ao listar modelos**: {str(e)}"
+    
     def alpha_weighting_wrapper(self, tickers_input, benchmark, risk_free_rate):
         """Wrapper para análise de ponderação alfa."""
         try:
@@ -85,97 +182,6 @@ class GradioInterface:
             error_msg = f"❌ **Erro na análise alfa**: {str(e)}"
             empty_fig = go.Figure()
             return empty_fig, empty_fig, error_msg
-    
-    def gemini_insights_wrapper(self, tickers, gemini_key, analysis_type):
-        """Wrapper para insights do Gemini AI."""
-        try:
-            if not gemini_key.strip():
-                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio"
-            
-            # Configurar API key
-            success = self.predictor.configure_gemini(gemini_key.strip())
-            if not success:
-                return "❌ **Erro**: API key inválida ou erro de conexão com Google AI Studio"
-            
-            tickers_list = [t.strip().upper() for t in tickers.split(',') if t.strip()]
-            
-            if analysis_type == "Comentário de Mercado":
-                context = f"Análise de mercado para portfólio de {len(tickers_list)} ativos"
-                return self.predictor.get_market_commentary_gemini(tickers_list, context)
-            elif analysis_type == "Avaliação de Risco":
-                portfolio_data = {
-                    'tickers': tickers_list,
-                    'num_assets': len(tickers_list),
-                    'analysis_date': pd.Timestamp.now().strftime('%Y-%m-%d')
-                }
-                return self.predictor.get_risk_assessment_gemini(tickers_list, portfolio_data)
-            else:
-                return "❌ **Erro**: Tipo de análise não suportado"
-                
-        except Exception as e:
-            return f"❌ **Erro nos insights Gemini**: {str(e)}"
-    
-    def gemini_vcov_insights_wrapper(self, tickers, period, window, gemini_key):
-        """Wrapper para insights V-Cov do Gemini."""
-        try:
-            if not gemini_key.strip():
-                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio para insights"
-            
-            # Configurar API key
-            success = self.predictor.configure_gemini(gemini_key.strip())
-            if not success:
-                return "❌ **Erro**: API key inválida ou erro de conexão"
-            
-            # Executar previsão V-Cov primeiro
-            result = self.predictor.predict_vcov_matrix(
-                tickers, int(period), int(window)
-            )
-            
-            if not result['success']:
-                return f"❌ **Erro na previsão**: {result['result_text']}"
-            
-            # Gerar insights
-            additional_data = {
-                'period_years': int(period),
-                'window_days': int(window),
-                'prediction_date': pd.Timestamp.now().strftime('%Y-%m-%d')
-            }
-            
-            return self.predictor.get_vcov_insights_gemini(
-                result['vcov_matrix'], 
-                result['tickers'],
-                additional_data
-            )
-            
-        except Exception as e:
-            return f"❌ **Erro nos insights V-Cov Gemini**: {str(e)}"
-    
-    def gemini_alpha_insights_wrapper(self, tickers_input, benchmark, risk_free_rate, gemini_key):
-        """Wrapper para insights de ponderação alfa do Gemini."""
-        try:
-            if not gemini_key.strip():
-                return "❌ **Erro**: Por favor, insira sua API key do Google AI Studio para insights"
-            
-            # Configurar API key
-            success = self.predictor.configure_gemini(gemini_key.strip())
-            if not success:
-                return "❌ **Erro**: API key inválida ou erro de conexão"
-            
-            # Converter taxa de juros
-            risk_free_rate = float(risk_free_rate) / 100 if risk_free_rate else 0.02
-            
-            # Executar análise alfa
-            alpha_result = self.predictor.calculate_alpha_weighted_portfolio(
-                tickers_input=tickers_input,
-                benchmark=benchmark,
-                risk_free_rate=risk_free_rate
-            )
-            
-            # Gerar insights
-            return self.predictor.get_alpha_insights_gemini(alpha_result)
-            
-        except Exception as e:
-            return f"❌ **Erro nos insights alfa Gemini**: {str(e)}"
     
     def _create_weights_chart(self, alpha_result):
         """Cria gráfico de barras com os pesos calculados."""
@@ -536,6 +542,22 @@ class GradioInterface:
                                         value="Configure a API key e parâmetros, depois clique em 'Analisar Alfa'...",
                                         height=500
                                     )
+                        
+                        with gr.TabItem("🤖 Modelos Disponíveis"):
+                            with gr.Row():
+                                with gr.Column(scale=1):
+                                    list_models_btn = gr.Button(
+                                        "📋 Listar Modelos Gemini",
+                                        variant="secondary",
+                                        size="lg"
+                                    )
+                                    gr.Markdown("*Visualize todos os modelos disponíveis do Google AI Studio*")
+                                
+                                with gr.Column(scale=2):
+                                    models_list_output = gr.Markdown(
+                                        value="Configure a API key e clique em 'Listar Modelos'...",
+                                        height=500
+                                    )
             
             # Conectar eventos V-Cov
             predict_btn.click(
@@ -572,6 +594,13 @@ class GradioInterface:
                 fn=self.gemini_alpha_insights_wrapper,
                 inputs=[gemini_alpha_tickers, gemini_alpha_benchmark, gemini_alpha_risk_free, gemini_key_input],
                 outputs=[gemini_alpha_insights_output],
+                show_progress=True
+            )
+            
+            list_models_btn.click(
+                fn=self.list_gemini_models_wrapper,
+                inputs=[gemini_key_input],
+                outputs=[models_list_output],
                 show_progress=True
             )
         

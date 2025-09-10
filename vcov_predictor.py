@@ -19,7 +19,6 @@ from tensorflow.keras import layers
 from sklearn.preprocessing import MinMaxScaler
 from alpha_weighting import AlphaWeighting
 from gemini_insights import GeminiInsights
-from typing import Dict, List
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -369,71 +368,6 @@ class VCovPredictor:
 
         return result_text
 
-    def configure_gemini(self, api_key: str) -> bool:
-        """
-        Configura a API key do Google AI Studio.
-        
-        Args:
-            api_key: Chave da API Google AI Studio
-            
-        Returns:
-            True se configurada com sucesso
-        """
-        return self.gemini_insights.set_api_key(api_key)
-    
-    def get_vcov_insights_gemini(self, vcov_matrix: np.ndarray, tickers: List[str], 
-                               additional_data: Dict = None) -> str:
-        """
-        Gera insights do Gemini sobre a matriz V-Cov.
-        
-        Args:
-            vcov_matrix: Matriz de variância-covariância
-            tickers: Lista de tickers
-            additional_data: Dados adicionais para contexto
-            
-        Returns:
-            Insights do Gemini
-        """
-        return self.gemini_insights.analyze_vcov_matrix(vcov_matrix, tickers, additional_data)
-    
-    def get_market_commentary_gemini(self, tickers: List[str], context: str = "") -> str:
-        """
-        Gera comentário de mercado do Gemini.
-        
-        Args:
-            tickers: Lista de tickers
-            context: Contexto adicional
-            
-        Returns:
-            Comentário de mercado
-        """
-        return self.gemini_insights.generate_market_commentary(tickers, context)
-
-    def get_alpha_insights_gemini(self, alpha_result: Dict) -> str:
-        """
-        Gera insights do Gemini sobre ponderação alfa.
-        
-        Args:
-            alpha_result: Resultado da análise alfa
-            
-        Returns:
-            Insights do Gemini sobre alfa
-        """
-        return self.gemini_insights.analyze_alpha_portfolio(alpha_result)
-    
-    def get_risk_assessment_gemini(self, tickers: List[str], portfolio_data: Dict) -> str:
-        """
-        Gera avaliação de risco do Gemini.
-        
-        Args:
-            tickers: Lista de tickers
-            portfolio_data: Dados do portfólio
-            
-        Returns:
-            Avaliação de risco detalhada
-        """
-        return self.gemini_insights.generate_risk_assessment(tickers, portfolio_data)
-
     def calculate_alpha_weighted_portfolio(self, tickers_input, benchmark="^GSPC", risk_free_rate=0.02, period="2y"):
         """
         Calcula ponderação alfa para o portfólio.
@@ -552,3 +486,63 @@ class VCovPredictor:
         result_text += "- Ativos com alfa negativo podem ser candidatos a short\n\n"
         
         return result_text
+    
+    def configure_gemini(self, api_key: str) -> bool:
+        """
+        Configura a integração com Gemini AI.
+        
+        Args:
+            api_key: API key do Google AI Studio
+            
+        Returns:
+            bool: True se configuração bem-sucedida
+        """
+        return self.gemini_insights.set_api_key(api_key)
+    
+    def get_vcov_insights(self, vcov_matrix, tickers, additional_data=None) -> str:
+        """
+        Obtém insights sobre matriz V-Cov usando Gemini AI.
+        
+        Args:
+            vcov_matrix: Matriz de variância-covariância
+            tickers: Lista de tickers
+            additional_data: Dados adicionais para contexto
+            
+        Returns:
+            str: Insights do Gemini sobre a matriz V-Cov
+        """
+        return self.gemini_insights.analyze_vcov_matrix(vcov_matrix, tickers, additional_data)
+    
+    def get_alpha_insights(self, alpha_result: dict) -> str:
+        """
+        Obtém insights sobre ponderação alfa usando Gemini AI.
+        
+        Args:
+            alpha_result: Resultado do cálculo de ponderação alfa
+            
+        Returns:
+            str: Insights do Gemini sobre o portfólio alfa
+        """
+        return self.gemini_insights.analyze_alpha_portfolio(alpha_result)
+    
+    def get_market_commentary(self, tickers: list, context: str = "") -> str:
+        """
+        Gera comentário de mercado usando Gemini AI.
+        
+        Args:
+            tickers: Lista de tickers
+            context: Contexto adicional
+            
+        Returns:
+            str: Comentário de mercado do Gemini
+        """
+        return self.gemini_insights.generate_market_commentary(tickers, context)
+    
+    def list_gemini_models(self) -> str:
+        """
+        Lista modelos disponíveis do Gemini AI.
+        
+        Returns:
+            str: Lista de modelos disponíveis
+        """
+        return self.gemini_insights.list_available_models()
